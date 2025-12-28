@@ -392,14 +392,6 @@ export default function Home() {
             Round Generate
           </button>
 
-          <button
-            type="button"
-            onClick={exportAllToExcel}
-            className="rounded-full bg-zinc-900 text-white text-xs font-medium px-4 py-1.5 hover:bg-zinc-800 disabled:opacity-40 disabled:cursor-not-allowed"
-            disabled={!rounds.length}
-          >
-            Export to Excel
-          </button>
         </div>
         {
           rounds.map((round, index) => (
