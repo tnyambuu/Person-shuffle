@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import * as XLSX from "xlsx";
 
 type Person = {
   id: number;
@@ -243,120 +242,6 @@ export default function Home() {
     console.log(opponentGirls);
 
     console.log(roundPairs);
-  };
-
-  const buildOpponentSheet = (
-    opponentsObj: any,
-    personType: "boy" | "girl"
-  ) => {
-    // opponentsObj: { [id]: { info: Person, opponents: Person[] } }
-    const entries = Object.values(opponentsObj || {}) as {
-      info: Person;
-      opponents: Person[];
-    }[];
-  
-    if (!entries.length) {
-      return XLSX.utils.aoa_to_sheet([[personType === "boy" ? "Boys" : "Girls"]]);
-    }
-  
-    const maxOpponents = Math.max(
-      ...entries.map((e) => (e.opponents ? e.opponents.length : 0))
-    );
-  
-    const blockWidth = 4; // Boy_name / Round_number / Opponent_id / Opponent_name
-    const totalCols = entries.length * blockWidth;
-    const totalRows = maxOpponents + 2; // 1 header row + N opponent rows
-    const rows: (string | number | null)[][] = Array.from(
-      { length: totalRows },
-      () => Array(totalCols).fill(null)
-    );
-  
-    entries.forEach((entry, idx) => {
-      const col = idx * blockWidth;
-  
-      const isBoySheet = personType === "boy";
-      const personHeader = isBoySheet ? "Boy_name" : "Girl_name";
-      const oppIdHeader = isBoySheet ? "Girl_id" : "Boy_id";
-      const oppNameHeader = isBoySheet ? "Girl_name" : "Boy_name";
-  
-      // Header row for this block
-      rows[0][col + 0] = personHeader;
-      rows[0][col + 1] = "Round_number";
-      rows[0][col + 2] = oppIdHeader;
-      rows[0][col + 3] = oppNameHeader;
-  
-      // One row per round/opponent
-      entry.opponents.forEach((opp, i) => {
-        const r = i + 1;
-        rows[r][col + 0] = entry.info.name;
-        rows[r][col + 1] = i + 1; // round number = index + 1
-        rows[r][col + 2] = opp?.id ?? null;
-        rows[r][col + 3] = opp?.name ?? null;
-      });
-    });
-  
-    return XLSX.utils.aoa_to_sheet(rows);
-  };
-
-  const buildRoundsSheet = () => {
-    if (!rounds.length) {
-      return XLSX.utils.aoa_to_sheet([["No rounds"]]);
-    }
-  
-    const blockWidth = 4; // Boy_id / Boy_name / Girl_id / Girl_name
-    const maxPairs = Math.max(...rounds.map((r) => r.length));
-    const totalCols = rounds.length * blockWidth;
-    const totalRows = maxPairs + 2; // 1 title/header row + N pairs
-    const rows: (string | number | null)[][] = Array.from(
-      { length: totalRows },
-      () => Array(totalCols).fill(null)
-    );
-  
-    rounds.forEach((round, roundIndex) => {
-      const col = roundIndex * blockWidth;
-  
-      // Title for this round
-      rows[0][col] = `Round ${roundIndex + 1}`;
-  
-      // Column headers
-      rows[1][col + 0] = "Boy_id";
-      rows[1][col + 1] = "Boy_name";
-      rows[1][col + 2] = "Girl_id";
-      rows[1][col + 3] = "Girl_name";
-  
-      round.forEach((pair: any, pairIndex: number) => {
-        const row = pairIndex + 2;
-        const boy = pair.boy as Person | undefined;
-        const girl = pair.girl as Person | undefined;
-  
-        rows[row][col + 0] = boy?.id ?? null;
-        rows[row][col + 1] = boy?.name ?? null;
-        rows[row][col + 2] = girl?.id ?? null;
-        rows[row][col + 3] = girl?.name ?? null;
-      });
-    });
-  
-    return XLSX.utils.aoa_to_sheet(rows);
-  };
-
-  const exportAllToExcel = () => {
-    if (!rounds.length) return;
-  
-    const wb = XLSX.utils.book_new();
-  
-    // Sheet 1: Boys opponents (blocks like your screenshot)
-    const boysSheet = buildOpponentSheet(opponentBoys, "boy");
-    XLSX.utils.book_append_sheet(wb, boysSheet, "Boys opponents");
-  
-    // Sheet 2: Girls opponents
-    const girlsSheet = buildOpponentSheet(opponentGirls, "girl");
-    XLSX.utils.book_append_sheet(wb, girlsSheet, "Girls opponents");
-  
-    // Sheet 3: Rounds, each round in its own 4‑column block
-    const roundsSheet = buildRoundsSheet();
-    XLSX.utils.book_append_sheet(wb, roundsSheet, "Rounds");
-  
-    XLSX.writeFile(wb, "speed-date.xlsx");
   };
 
   return (
